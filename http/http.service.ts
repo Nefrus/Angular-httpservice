@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-import {saveToken, tokenNotExpired} from '../auth/auth-http';
 
 @Injectable()
 export class HttpService {
@@ -21,10 +20,6 @@ export class HttpService {
    * @returns {Promise<R>|Promise<U>}
    */
   public get(url: string): any {
-    if (tokenNotExpired('jwt')) {
-      const token = localStorage.getItem('jwt');
-      this.headers.set('token', token);
-    }
     return this.httpClient.get(this.rootPath + url, {headers: this.headers, observe: 'response'}).toPromise()
       .then(this.handleSuccess)
       .catch(res => this.handleError(res));
@@ -37,10 +32,6 @@ export class HttpService {
    * @returns {Promise<R>|Promise<U>}
    */
   public post(url: string, params: any): any {
-    if (tokenNotExpired('jwt')) {
-      const token = localStorage.getItem('jwt');
-      this.headers.set('token', token);
-    }
     return this.httpClient.post(this.rootPath + url, params, {headers: this.headers, observe: 'response'})
       .toPromise().then(this.handleSuccess).catch(res => this.handleError(res));
   }
@@ -53,14 +44,6 @@ export class HttpService {
   private handleSuccess(res: any) {
     const _body = res['body'];
     if (_body) {
-      if (res.headers.get('token')) {
-        saveToken(res.headers.get('token'));
-      }
-      /*      // 判断是否被过滤器过滤
-            if (!res.success) {
-              const url = 'http://' + window.location.host + '/zygl/html/index.html';
-              window.location.href = url;
-            }*/
       return {
         data: res.body.returnObject,
         page: res.body.page,
